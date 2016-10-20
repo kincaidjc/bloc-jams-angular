@@ -1,10 +1,10 @@
 (function(){
-    function SongPlayer(Fixtures){
+    function SongPlayer($rootScope, Fixtures){
         
         /**
- +       *@desc empty SongPlayer object
- +       *@type {Object}
- +       */
+          *@desc empty SongPlayer object
+          *@type {Object}
+          */
         
         var SongPlayer = {};
         
@@ -16,26 +16,39 @@
         var currentAlbum = Fixtures.getAlbum();
         
         /**
-         * @desc Buzz object audio file
-         * @type {Object}
-         */
+          * @desc Buzz object audio file
+          * @type {Object}
+          */
 
         var currentBuzzObject = null;
         
         /**
- +        *@desc current song
- +        *@type {Object}
- +        */
+          *@desc current song
+          *@type {Object}
+          */
         
         
         SongPlayer.currentSong = null;
         
+        /**
+          *@desc Current playback time (in seconds) of currently playing song
+          *@type {number}
+          */
+        
+        SongPlayer.currentTime = null;
         
         /**
-         * @function setSong
-         * @desc Stops currently playing song and loads new audio file as currentBuzzObject
-         * @param {Object} song
-         */
+          *@desc Setting initial volume for songPlayer
+          *@type {number}
+          */
+        
+        SongPlayer.volume = 60;
+        
+        /**
+          * @function setSong
+          * @desc Stops currently playing song and loads new audio file as currentBuzzObject
+          * @param {Object} song
+          */
         
         var setSong = function(song){
             if(currentBuzzObject){
@@ -48,24 +61,30 @@
                     preload: true
                 });
             
+                currentBuzzObject.bind('timeupdate', function(){
+                    $rootScope.$apply(function(){
+                        SongPlayer.currentTime = currentBuzzObject.getTime();
+                    });
+                });
+            
                 SongPlayer.currentSong = song; 
         };
         
          /**
-          *@function getSongIndex
-          *@desc get the index of a song from the album array
-          *@type [array] index
-          */
+           *@function getSongIndex
+           *@desc get the index of a song from the album array
+           *@type [array] index
+           */
         
         var getSongIndex = function(song){
             return currentAlbum.songs.indexOf(song);
         };
         
         /**
- +       *@function playSong
- +       *@desc Plays current audio file and sets song.playing to true
- +       *@param {Object} song
- +       */
+          *@function playSong
+          *@desc Plays current audio file and sets song.playing to true
+          *@param {Object} song
+          */
         
         var playSong = function(song){
             if(currentBuzzObject){
@@ -88,10 +107,10 @@
         };
         
         /**
- +       *@function SongPlayer.play method
- +       *@desc Checks if current song playing equals the selected song, if not then it sets the current song to the selected song and plays this song.  If current song is the same as the selected song, checks to see if audo file is paused.  If so, it plays selected song.
- +       *@param {Object} song
- +       */
+          *@function SongPlayer.play method
+          *@desc Checks if current song playing equals the selected song, if not then it sets the current song to the selected song and plays this song.  If current song is the same as the selected song, checks to see if audo file is paused.  If so, it plays selected song.
+          *@param {Object} song
+          */
         
         SongPlayer.play = function(song){
             song = song || SongPlayer.currentSong;
@@ -106,10 +125,10 @@
         };
         
         /**
- +       *@function SongPlayer.pause method
- +       *@desc Pauses current audio file and sets song.playing to false
- +       *@param {Object} song
- +       */
+          *@function SongPlayer.pause method
+          *@desc Pauses current audio file and sets song.playing to false
+          *@param {Object} song
+          */
         
         SongPlayer.pause = function(song){
             song = song || SongPlayer.currentSong;
@@ -154,10 +173,34 @@
             }
         };
         
+        /**
+          *@function setCurrentTime
+          *@desc Set current time (in seconds) of currently playing song
+          *@param {number} time
+          */
+        
+        SongPlayer.setCurrentTime = function(time){
+            if(currentBuzzObject){
+                currentBuzzObject.setTime(time);
+            }
+        };
+        
+        /**
+          *@function setVolume
+          *@desc sets volume in the songPlayer
+          *@param {volume}
+          */
+        
+        SongPlayer.setVolume = function(volume){
+            if(currentBuzzObject){
+                currentBuzzObject.setVolume(volume);
+            }
+        };
+        
         return SongPlayer;
     }
     
     angular
         .module('blocJams')
-        .factory('SongPlayer', SongPlayer);
+        .factory('SongPlayer', ['$rootScope', 'Fixtures', SongPlayer]);
 })();
